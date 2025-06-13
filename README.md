@@ -9,8 +9,8 @@ Currently by the date im writing this it's literally just a serializer(instance 
 - [x] Cache classes serialization data
 - [x] Configurable data packing formats
 - [ ] Multi threading
-- [ ] Unserializer function
 - [ ] Copy paste support
+- [ ] Unserializer function
 - [ ] Support for Script/LocalScript Instances(through emulation with coroutines)
 - [ ] Instance diffs(caching a instance that has many similars)
 - [ ] Compression options(zlib, deflate)
@@ -18,3 +18,4 @@ Currently by the date im writing this it's literally just a serializer(instance 
 - [ ] Add output metadata for versioning
 - [ ] Whitelist/Blacklist property names
 - [ ] Distribute as a plugin on roblox marketplace
+- [ ] Save at web option when using the plugin
