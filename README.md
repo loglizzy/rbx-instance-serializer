@@ -18,4 +18,7 @@ Currently by the date im writing this it's literally just a serializer(instance 
 - [ ] Add output metadata for versioning
 - [ ] Whitelist/Blacklist property names
 - [ ] Distribute as a plugin on roblox marketplace
-- [ ] Save at web option when using the plugin
+
+### Plugin todo
+- [ ] Save at web with a short hash
+- [ ] Load from hash
