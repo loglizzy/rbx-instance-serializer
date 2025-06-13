@@ -20,5 +20,5 @@ Currently by the date im writing this it's literally just a serializer(instance 
 - [ ] Distribute as a plugin on roblox marketplace
 
 ### Plugin todo
-- [ ] Save at web with a short hash
-- [ ] Load from hash
+- [ ] Index at a website with the serialized instance sha256 hash
+- [ ] Load instance from hash
