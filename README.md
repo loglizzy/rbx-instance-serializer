@@ -5,7 +5,7 @@ Ultra fast and size effective instance serializer for Roblox.
 Currently by the date im writing this it's literally just a serializer(instance -> text), it has no unserializing method(text -> instance)(im working on it ok, soon it's gonna be published)
 
 # Perfomance
-Serializes `34.741` instances in just `0.1736` seconds(test made using a i5 laptop CPU)
+Serializes `34.741` instances in just `0.1736` seconds(test made using a `Intel i5 vPRO` laptop CPU)
 
 # Features
 Serializer:
