@@ -6,6 +6,9 @@ Can serialize a game entire map(with 50k instances) under 1 second even on slow 
 # Warning
 Currently by the date im writing this it's literally just a serializer(instance -> text), it has no unserializing method(text -> instance)(im working on it ok, soon it's gonna be published)
 
+# Perfomance
+Serializes `34.741` instances in just `0.1736` seconds
+
 # Features
 Serializer:
 - [x] Cache classes serialization data
