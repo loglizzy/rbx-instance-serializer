@@ -17,8 +17,8 @@ Currently by the date im writing this it's literally just a serializer(instance 
 - [ ] Attributes support
 - [ ] Add output metadata for versioning
 - [ ] Whitelist/Blacklist property names
-- [ ] Distribute as a plugin on roblox marketplace
 
 ### Plugin todo
+- [ ] Distribute as a plugin on roblox marketplace
 - [ ] Index at a website with the serialized instance sha256 hash
 - [ ] Load instance from hash
