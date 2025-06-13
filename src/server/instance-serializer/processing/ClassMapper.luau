@@ -23,7 +23,7 @@ end
 
 -- Initialize with Name property as it's always included
 local baseStringProperties = {
-	Name = string.pack(PROPERTY_ID_FORMAT, 1)
+	Name = 1
 }
 
 -- Maps a single class's properties and creates its serialization information
@@ -37,7 +37,7 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 	-- Track string-type properties separately
 	local stringProperties = table.clone(baseStringProperties)
 
-	local id = 2
+	local propCount = 1
 	-- Iterate through all class members to find serializable properties
 	for _, property in class.Members do
 		local valueType = property.ValueType
@@ -65,8 +65,11 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 		local valueTypeName = valueType.Name
 		if valueType.Category == "Class" then
 			-- For properties with instance value
-			id += 1
-			instanceProperties[propertyName] = id
+			propCount += 1
+			instanceProperties[propertyName] = propCount
+		elseif valueTypeName == "string" then
+			propCount += 1
+			stringProperties[propertyName] = propCount
 		else
 			-- For any other properties
 			serializer = valueTypesSerializers[valueTypeName]
@@ -74,9 +77,9 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 				continue
 			end
 
-			id += 1
+			propCount += 1
 			properties[propertyName] = {
-				string.pack(PROPERTY_ID_FORMAT, id),
+				propCount,
 				serializer,
 			}
 		end
@@ -96,7 +99,7 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 	end
 
 	return {
-		string.pack(CLASS_ID_FORMAT, classId) .. string.pack(TOTAL_PROPERTIES_FORMAT, id),
+		classId,
 		properties,
 		instanceProperties,
 		stringProperties,

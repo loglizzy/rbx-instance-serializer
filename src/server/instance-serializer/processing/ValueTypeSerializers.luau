@@ -1,52 +1,90 @@
 local format = require(script.Parent.Parent.format)
-local INT_FORMAT = format.INT
-local VECTOR_3_FORMAT = format.INT
-local COLOR_3_FORMAT = format.COLOR_3
-local UDIM_2_FORMAT = format.UDIM_2
-local CFRAME_FORMAT = format.CFRAME
-local UDIM_FORMAT = format.INT
-local ENUM_FORMAT = format.ENUM
 
-local stringPack = string.pack
 local min = math.min
 return {
-	int = function(x)
-		return stringPack(INT_FORMAT, x)
+	int = function(b: buffer, o: number, x: number)
+		buffer.writei32(b, o, x)
+		return o + 4
 	end,
-	Vector3 = function(x: Vector3)
-		return stringPack(VECTOR_3_FORMAT, x.X, x.Y, x.Z)
+	Vector3 = function(b: buffer, o: number, x: Vector3)
+		buffer.writef32(b, o, x.X)
+		o += 4
+		buffer.writef32(b, o, x.Y)
+		o += 4
+		buffer.writef32(b, o, x.Z)
+		return o + 4
 	end,
-	bool = function(x: boolean)
-		return x and "\1" or "\0"
+	bool = function(b: buffer, o: number, x: boolean)
+		buffer.writeu8(b, o, if x then 1 else 0)
+		return o + 1
 	end,
-	Color3 = function(x: Color3)
-		return stringPack(COLOR_3_FORMAT, min(255, x.R * 255), min(255, x.G * 255), min(255, x.B * 255))
+	Color3 = function(b: buffer, o: number, x: Color3)
+		buffer.writeu8(b, o, min(255, x.R * 255))
+		o += 1
+		buffer.writeu8(b, o, min(255, x.G * 255))
+		o += 1
+		buffer.writeu8(b, o, min(255, x.B * 255))
+		return o + 1
 	end,
-	UDim2 = function(x: UDim2)
-		return stringPack(UDIM_2_FORMAT, x.X.Scale, x.X.Offset, x.Y.Scale, x.Y.Offset)
+	UDim2 = function(b: buffer, o: number, x: UDim2)
+		buffer.writef32(b, o, x.X.Scale)
+		o += 4
+		buffer.writef32(b, o, x.X.Offset)
+		o += 4
+		buffer.writef32(b, o, x.Y.Scale)
+		o += 4
+		buffer.writef32(b, o, x.Y.Offset)
+		return o + 4
 	end,
-	CFrame = function(x: CFrame)
+	CFrame = function(b: buffer, o: number, x: CFrame)
 		local pos = x.Position
 		local look = x.LookVector
-		return stringPack(CFRAME_FORMAT, pos.X, pos.Y, pos.Z, look.X, look.Y, look.Z)
+		buffer.writef32(b, o, pos.X)
+		o += 4
+		buffer.writef32(b, o, pos.Y)
+		o += 4
+		buffer.writef32(b, o, pos.Z)
+		o += 4
+		buffer.writef32(b, o, look.X)
+		o += 4
+		buffer.writef32(b, o, look.Y)
+		o += 4
+		buffer.writef32(b, o, look.Z)
+		return o + 4
 	end,
-	UDim = function(x: UDim)
-		return stringPack(UDIM_FORMAT, x.Scale, x.Offset)
+	UDim = function(b: buffer, o: number, x: UDim)
+		buffer.writef32(b, o, x.Scale)
+		o += 4
+		buffer.writef32(b, o, x.Offset)
+		return o + 4
 	end,
-	BrickColor = function(x: BrickColor)
-		return stringPack(ENUM_FORMAT, x.Number)
+	BrickColor = function(b: buffer, o: number, x: BrickColor)
+		buffer.writei32(b, o, x.Number)
+		return o + 4
 	end,
-	Vector2 = function(x: Vector2)
-		return stringPack("ff", x.X, x.Y)
+	Vector2 = function(b: buffer, o: number, x: Vector2)
+		buffer.writef32(b, o, x.X)
+		o += 4
+		buffer.writef32(b, o, x.Y)
+		return o + 4
 	end,
-	NumberSequence = function(x: NumberSequence)
-		local result = stringPack("i", #x.Keypoints)
+	NumberSequence = function(b: buffer, o: number, x: NumberSequence)
+		buffer.writei32(b, o, #x.Keypoints)
+		o += 4
 		for _, keypoint in x.Keypoints do
-			result ..= stringPack("fff", keypoint.Time, keypoint.Value, keypoint.Envelope)
+			buffer.writef32(b, o, keypoint.Time)
+			o += 4
+			buffer.writef32(b, o, keypoint.Value)
+			o += 4
+			buffer.writef32(b, o, keypoint.Envelope)
+			o += 4
 		end
-		return result
+		return o
 	end,
-	NumberRange = function(x: NumberRange)
-		return stringPack("ff", x.Min, x.Max)
+	NumberRange = function(b: buffer, o: number, x: NumberRange)
+		buffer.writef32(b, o, x.Min)
+		o += 4
+		buffer.writef32(b, o, x.Max)
+		return o + 4
 	end,
 }
