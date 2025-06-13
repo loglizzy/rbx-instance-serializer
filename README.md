@@ -11,7 +11,6 @@ Serializer:
 - [x] Cache classes serialization data
 - [ ] Multi threading
 - [ ] Copy paste support
-- [ ] Copy paste support
 - [ ] Unserializer function
 - [ ] Support for Script/LocalScript Instances(through emulation with coroutines)
 - [ ] Instance diffs(caching a instance that has many similars)
