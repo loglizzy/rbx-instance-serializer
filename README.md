@@ -9,7 +9,10 @@ Currently by the date im writing this it's literally just a serializer(instance 
 - [ ] Multi threading
 - [ ] Unserializer function
 - [ ] Copy paste support
-- [ ] Instance diffs(caching a instance that has many similars)
 - [ ] Support for Script/LocalScript Instances(through emulation with coroutines)
-- [ ] Distribute as a plugin on roblox marketplace
+- [ ] Instance diffs(caching a instance that has many similars)
 - [ ] Compression options(zlib, deflate)
+- [ ] Attributes support
+- [ ] Add output metadata for versioning
+- [ ] Whitelist/Blacklist property names
+- [ ] Distribute as a plugin on roblox marketplace
