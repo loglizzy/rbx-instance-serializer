@@ -1,5 +1,6 @@
 # About
 Ultra fast and size effective instance serializer for Roblox.
+
 Can serialize a game entire map(with 50k instances) under 1 second even on slow CPUs.
 
 # Warning
@@ -10,6 +11,8 @@ Serializer:
 - [x] Cache classes serialization data
 - [ ] Multi threading
 - [ ] Copy paste support
+- [ ] Copy paste support
+- [ ] Unserializer function
 - [ ] Support for Script/LocalScript Instances(through emulation with coroutines)
 - [ ] Instance diffs(caching a instance that has many similars)
 - [ ] Compression options(zlib, deflate)
