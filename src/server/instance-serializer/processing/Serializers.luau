@@ -19,7 +19,7 @@ function InstanceSerializer.Single(
 )
 	local classData = classMap[obj.ClassName]
 	if not classData then
-		return ""
+		return offset
 	end
 
 	lastInstanceIdMapped += 1
@@ -27,10 +27,10 @@ function InstanceSerializer.Single(
 
 	for propName, propData in classData[2] do
 		local id, serializer = propData[1], propData[2]
-
+		
 		writeu16(data, offset, id)
 		offset += 2
-
+		
 		offset = serializer(data, offset, obj[propName])
 	end
 
@@ -65,7 +65,7 @@ end
 
 local Single = InstanceSerializer.Single
 local function Recursive(data: buffer, offset: number, obj: Instance, instancesIdMap, lastInstanceIdMapped)
-	Single(data, offset, obj, instancesIdMap, lastInstanceIdMapped)
+	offset = Single(data, offset, obj, instancesIdMap, lastInstanceIdMapped)
 
 	local children = obj:GetChildren()
 

@@ -1,21 +1,24 @@
 -- Private
-local InstanceSerializer = require(script.processing.InstanceSerializer)
-local Single = InstanceSerializer.Single
-local Recursive = InstanceSerializer.Recursive
+local Serializers = require(script.processing.Serializers)
+local Single = Serializers.Single
+local Recursive = Serializers.Recursive
 
 -- Public
 local InstanceSerializer = {}
 
+local instanceAllocation = 200
 function InstanceSerializer.Single(instance: Instance)
+	local data = buffer.create(instanceAllocation)
 	local instancesIdMap = { [instance] = 0 }
-	return Single(instance, instancesIdMap, 0)
+	return Single(data, instance, instancesIdMap, 0)
 end
 
 function InstanceSerializer.Recursive(instance: Instance)
+	local allocation = #instance:GetDescendants() * instanceAllocation
+	local data = buffer.create(allocation)
+
 	local instancesIdMap = { [instance] = 0 }
-	local data = buffer.create(10000000)
-	local offset = 0
-	offset = Recursive(data, offset, instance, instancesIdMap, 0)
+	local offset = Recursive(data, 0, instance, instancesIdMap, 0)
 
 	return buffer.readstring(data, 0, offset)
 end
