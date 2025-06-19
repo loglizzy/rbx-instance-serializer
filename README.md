@@ -13,14 +13,14 @@ Here's the results you get when serializing a really big model:
 | Metric               | Value     |
 | -------------------- | --------- |
 | Instances serialized | 34,686    |
-| Elapsed Time (s)     | 0.166s    |
+| Elapsed Time (s)     | 0.150s    |
 | Output Size (B)      | 4,912,895 |
 | Output Size (KB)     | 4,912.90  |
 | Output Size (MB)     | 4.91      |
 
 _Benchmark made using a low-end **Intel i5 vPRO** laptop CPU_
 
-___
+---
 
 ## 📝 Todos
 
