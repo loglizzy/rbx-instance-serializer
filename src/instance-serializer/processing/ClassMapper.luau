@@ -35,9 +35,7 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 	local instanceProperties = {}
 
 	-- Track string-type properties separately
-	local stringProperties = {
-		Name = { 1, className },
-	}
+	local stringProperties = {}
 
 	local propCount = 1
 	-- Iterate through all class members to find serializable properties
@@ -60,7 +58,7 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 
 		-- Skip base properties
 		local propertyName = property.Name
-		if propertyName == "Parent" then
+		if propertyName == "Parent" or propertyName == "Name" then
 			continue
 		end
 

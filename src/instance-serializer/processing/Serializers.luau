@@ -5,19 +5,20 @@ local rblxAPIDump = require(script.Parent.Parent.modules["roblox-api-dumper"]).f
 local classMap = ClassMapper.GenerateMapping(rblxAPIDump)
 
 -- Public
-local InstanceSerializer = {}
+local Serializers = {}
 
 local writestring = buffer.writestring
 local writeu16 = buffer.writeu16
 local writeu8 = buffer.writeu8
-function InstanceSerializer.Single(
+function Serializers.Single(
 	data: buffer,
 	offset: number,
 	obj: Instance,
 	instancesIdMap: { [Instance]: number },
 	lastInstanceIdMapped: number
 )
-	local classData = classMap[obj.ClassName]
+	local className = obj.ClassName
+	local classData = classMap[className]
 	if not classData then
 		return offset
 	end
@@ -25,12 +26,23 @@ function InstanceSerializer.Single(
 	lastInstanceIdMapped += 1
 	instancesIdMap[obj] = lastInstanceIdMapped
 
+	-- Write name property
+	local name = obj.Name
+	if name ~= className then
+		writeu8(data, offset, 1)
+		offset += 1
+
+		writestring(data, offset, name)
+		offset += #name
+	end
+
+	-- General properties
 	for propName, propData in classData[2] do
 		local value = obj[propName]
 		if value == propData[2] then
 			continue
 		end
-		
+
 		local id, serializer = propData[1], propData[3]
 		writeu8(data, offset, id)
 		offset += 1
@@ -38,6 +50,7 @@ function InstanceSerializer.Single(
 		offset = serializer(data, offset, value)
 	end
 
+	-- Instance properties
 	for propName, propData in classData[3] do
 		local value = instancesIdMap[obj[propName]]
 		if value == propData[2] then
@@ -51,6 +64,7 @@ function InstanceSerializer.Single(
 		offset += 2
 	end
 
+	-- String properties
 	for propName, propData in classData[4] do
 		local value = obj[propName]
 		if value == propData[2] then
@@ -60,14 +74,14 @@ function InstanceSerializer.Single(
 		writeu8(data, offset, propData[1])
 		offset += 1
 
-		writestring(data, offset, value)
+		--writestring(data, offset, value)
 		offset += #value
 	end
 
 	return offset
 end
 
-local Single = InstanceSerializer.Single
+local Single = Serializers.Single
 local function Recursive(data: buffer, offset: number, obj: Instance, instancesIdMap, lastInstanceIdMapped)
 	offset = Single(data, offset, obj, instancesIdMap, lastInstanceIdMapped)
 
@@ -82,6 +96,6 @@ local function Recursive(data: buffer, offset: number, obj: Instance, instancesI
 	return offset
 end
 
-InstanceSerializer.Recursive = Recursive
+Serializers.Recursive = Recursive
 
-return InstanceSerializer
+return Serializers
