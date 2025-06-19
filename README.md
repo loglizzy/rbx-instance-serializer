@@ -2,6 +2,8 @@
 
 **Ultra-fast and size-effective instance serializer for Roblox.**
 
+Turns game instances into text at a insane speed.
+
 ---
 
 ## ⚡ Performance
