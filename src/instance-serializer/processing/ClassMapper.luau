@@ -1,16 +1,10 @@
 local valueTypesSerializers = require(script.Parent.ValueTypeSerializers)
-local format = require(script.Parent.Parent.format)
-
--- Constants for binary packing formats
-local PROPERTY_ID_FORMAT = format.PROPERTY_ID
-local CLASS_ID_FORMAT = format.CLASS_ID
-local TOTAL_PROPERTIES_FORMAT = format.TOTAL_PROPERTIES
 
 -- Tags that indicate properties that shouldn't be serialized
 local READ_ONLY_TAG = "ReadOnly"
 local NOT_SCRIPTABLE_TAG = "NotScriptable"
 
--- Private Functions
+-- Private
 -- Checks if a property has forbidden tags (ReadOnly or NotScriptable)
 local function isForbiddenTag(tags: { string })
 	for _, tag in tags do
@@ -21,21 +15,29 @@ local function isForbiddenTag(tags: { string })
 	return false
 end
 
--- Initialize with Name property as it's always included
-local baseStringProperties = {
-	Name = 1
-}
+local function CheckIndex(o, i)
+	local v = o[i]
+	o[i] = v
+	return v
+end
 
 -- Maps a single class's properties and creates its serialization information
-local baseProperties = {}
 local function MapClass(classMap: any, class: any, classSuper: string, classId: number)
+	-- Try creating an instance of the class
+	-- used to determine default values for properties
+	local className = class.Name
+	local ok, classInstance = pcall(Instance.new, className)
+	classInstance = ok and classInstance
+
 	local properties = {}
 
 	-- Track instance-type properties separately
 	local instanceProperties = {}
 
 	-- Track string-type properties separately
-	local stringProperties = table.clone(baseStringProperties)
+	local stringProperties = {
+		Name = { 1, className },
+	}
 
 	local propCount = 1
 	-- Iterate through all class members to find serializable properties
@@ -50,14 +52,27 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 			continue
 		end
 
+		-- Skip properties that are not readable or writable
 		local security = property.Security
 		if security.Read ~= "None" or security.Write ~= "None" then
 			continue
 		end
 
+		-- Skip base properties
 		local propertyName = property.Name
-		if propertyName == "Name" or propertyName == "Parent" then
+		if propertyName == "Parent" then
 			continue
+		end
+
+		local propertyDefault
+		if classInstance then
+			local ok, res = pcall(CheckIndex, classInstance, propertyName)
+			-- Skip property if it cannot be accessed
+			if not ok then
+				continue
+			end
+
+			propertyDefault = res
 		end
 
 		-- Determine the appropriate serializer for the property type
@@ -66,10 +81,11 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 		if valueType.Category == "Class" then
 			-- For properties with instance value
 			propCount += 1
-			instanceProperties[propertyName] = propCount
+			instanceProperties[propertyName] = { propCount, propertyDefault }
 		elseif valueTypeName == "string" then
+			-- For string properties
 			propCount += 1
-			stringProperties[propertyName] = propCount
+			stringProperties[propertyName] = { propCount, propertyDefault }
 		else
 			-- For any other properties
 			serializer = valueTypesSerializers[valueTypeName]
@@ -80,22 +96,30 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 			propCount += 1
 			properties[propertyName] = {
 				propCount,
+				propertyDefault,
 				serializer,
 			}
 		end
 	end
 
-	-- Inherit properties from superclass
-	for i, v in classMap[classSuper][2] do
-		properties[i] = v
+	if classInstance then
+		classInstance:Destroy()
 	end
 
-	for i, v in classMap[classSuper][3] do
-		instanceProperties[i] = v
-	end
+	classSuper = classMap[classSuper]
+	-- Inherit properties from super class
+	if classSuper then
+		for i, v in classSuper[2] do
+			properties[i] = v
+		end
 
-	for i, v in classMap[classSuper][4] do
-		stringProperties[i] = v
+		for i, v in classSuper[3] do
+			instanceProperties[i] = v
+		end
+
+		for i, v in classSuper[4] do
+			stringProperties[i] = v
+		end
 	end
 
 	return {
@@ -125,7 +149,7 @@ local function MapClassesWithSuper(classList: { any }, mappedSupers: {}, classMa
 	return notMapped, classCount
 end
 
--- Public API
+-- Public
 local ClassMapper = {}
 
 -- Generates a mapping of all classes and their serializable properties

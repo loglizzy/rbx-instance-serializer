@@ -1,5 +1,3 @@
-task.wait(1)
-
 local InstanceSerializer = require(script.Parent["instance-serializer"])
 local Recursive = InstanceSerializer.Recursive
 

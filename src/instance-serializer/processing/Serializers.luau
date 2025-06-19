@@ -1,6 +1,5 @@
 local ClassMapper = require(script.Parent.ClassMapper)
 local rblxAPIDump = require(script.Parent.Parent.modules["roblox-api-dumper"]).fetchAndDecodeDump()
-local format = require(script.Parent.Parent.format)
 
 -- Generate the class serialization mapping
 local classMap = ClassMapper.GenerateMapping(rblxAPIDump)
@@ -10,6 +9,7 @@ local InstanceSerializer = {}
 
 local writestring = buffer.writestring
 local writeu16 = buffer.writeu16
+local writeu8 = buffer.writeu8
 function InstanceSerializer.Single(
 	data: buffer,
 	offset: number,
@@ -26,35 +26,39 @@ function InstanceSerializer.Single(
 	instancesIdMap[obj] = lastInstanceIdMapped
 
 	for propName, propData in classData[2] do
-		local id, serializer = propData[1], propData[2]
+		local value = obj[propName]
+		if value == propData[2] then
+			continue
+		end
 		
-		writeu16(data, offset, id)
-		offset += 2
-		
-		offset = serializer(data, offset, obj[propName])
+		local id, serializer = propData[1], propData[3]
+		writeu8(data, offset, id)
+		offset += 1
+
+		offset = serializer(data, offset, value)
 	end
 
-	for propName, propId in classData[3] do
+	for propName, propData in classData[3] do
 		local value = instancesIdMap[obj[propName]]
-		if not value then
+		if value == propData[2] then
 			continue
 		end
 
-		writeu16(data, offset, propId)
-		offset += 2
+		writeu8(data, offset, propData[1])
+		offset += 1
 
 		writeu16(data, offset, value)
 		offset += 2
 	end
 
-	for propName, propId in classData[4] do
+	for propName, propData in classData[4] do
 		local value = obj[propName]
-		if not value then
+		if value == propData[2] then
 			continue
 		end
 
-		writeu16(data, offset, propId)
-		offset += 2
+		writeu8(data, offset, propData[1])
+		offset += 1
 
 		writestring(data, offset, value)
 		offset += #value
@@ -68,7 +72,6 @@ local function Recursive(data: buffer, offset: number, obj: Instance, instancesI
 	offset = Single(data, offset, obj, instancesIdMap, lastInstanceIdMapped)
 
 	local children = obj:GetChildren()
-
 	writeu16(data, offset, #children)
 	offset += 2
 

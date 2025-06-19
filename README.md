@@ -1,9 +1,9 @@
-# About
+# Roblox Instance Serializer
 Ultra fast and size effective instance serializer for Roblox.
 
 # Perfomance
-Serializes `34.741` instances in just `0.150` seconds
-(test made using a low end `Intel i5 vPRO` laptop CPU)
+Serializes `34.741` instances in just `0.050` seconds
+(when using a low end `Intel i5 vPRO` laptop CPU)
 
 # Todos
 - [ ] Multi threading
