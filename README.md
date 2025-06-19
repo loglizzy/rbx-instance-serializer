@@ -7,7 +7,6 @@
 ## ⚡ Performance
 
 Here's the results you get when serializing a really big model:
-_Benchmark made using a low-end **Intel i5 vPRO** laptop CPU_
 
 | Metric               | Value     |
 | -------------------- | --------- |
@@ -16,6 +15,8 @@ _Benchmark made using a low-end **Intel i5 vPRO** laptop CPU_
 | Output Size (B)      | 4,912,895 |
 | Output Size (KB)     | 4,912.90  |
 | Output Size (MB)     | 4.91      |
+
+_Benchmark made using a low-end **Intel i5 vPRO** laptop CPU_
 
 ___
 
