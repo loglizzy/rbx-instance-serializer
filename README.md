@@ -1,40 +1,54 @@
 # 📦 Roblox Instance Serializer
 
-**Ultra-fast, size-efficient serializer for Roblox Instances.**
+**Ultra-fast, size-efficient serializer for Roblox Instances**
 
-Serialize game instances to text with exceptional speed and minimal size.
+Easily serialize and deserialize Roblox Instances to compact text with exceptional speed and minimal file size. Perfect for saving, sharing, or syncing complex models.
 
-## ⚡ Performance
-
-Benchmarks performed on a **model with 34,686 children**:
-
-| Mode                                    | Size (bytes) | Size (KB) | Size (MB) | Time (seconds) |
-| --------------------------------------- | ------------ | --------- | --------- | -------------- |
-| Single (selected instance only)         | 35           | 0.035     | 0.000035  | 0.000027       |
-| Recursive (instance + children)         | 4,963,573    | 4,963.573 | 4.964     | 0.132          |
-| RecursiveWithDiffs (recusive + caching) | 4,324,440    | 4,324.440 | 4.324     | 0.274          |
-
-_Benchmarks run on a low-end **Intel i5 vPRO** laptop CPU._
-
-_Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700116748/Super-Target-Store)_
+---
 
 ## 🚀 Features
 
-- Blazing fast serialization & deserialization
-- Highly compact output
-- Easy usage
+- **Blazing Fast:** Handles large hierarchies in milliseconds.
+- **Tiny Output:** Optimized for minimal serialized size.
+- **Flexible:** Supports single instances or entire hierarchies.
+- **Caching:** Smart diff-based serialization for efficient updates.
 
-## 📝 Roadmap
+---
 
-- [ ] Multi-threading support
-- [x] Deserialization (unserializer) function
-- [ ] Script/LocalScript support (via coroutine emulation)
-- [x] Instance diffs (cache similar instances)
-- [ ] Attributes support
-- [ ] Metadata for versioning
-- [ ] Property whitelist/blacklist
+## 🛠️ Usage
+
+```lua
+local Serializer = require(path.to.Serializer)
+
+-- Serialize an instance (and its children)
+local serialized = Serializer.serialize(instance)
+
+-- Deserialize back to an instance
+local restored = Serializer.deserialize(serialized)
+```
+
+---
+
+## ⚡ Performance
+
+Benchmarks on a **model with 34,686 children**:
+
+| Mode                                    | Size (bytes) | Size (KB) | Size (MB) | Time (seconds) |
+| ---------------------------------------- | ------------ | --------- | --------- | -------------- |
+| Single (selected instance only)          | 35           | 0.035     | 0.000035  | 0.000027       |
+| Recursive (instance + children)          | 4,963,573    | 4,963.573 | 4.964     | 0.132          |
+| RecursiveWithDiffs (recursive + caching) | 4,324,440    | 4,324.440 | 4.324     | 0.274          |
+
+_Benchmarks run on a low-end **Intel i5 vPRO** laptop CPU._  
+_Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700116748/Super-Target-Store)_
+
+---
 
 ## 🤝 Contributing
 
 Contributions and feedback are welcome!  
 Feel free to open issues or submit pull requests.
+
+---
+
+<sub>_README generated with help from GitHub Copilot_</sub>
