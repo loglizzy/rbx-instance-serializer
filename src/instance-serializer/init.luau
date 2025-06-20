@@ -2,18 +2,18 @@
 local ClassMapper = require(script["pre-processing"].ClassMapper)
 local classMap, deserialClassMap = ClassMapper.GenerateMapping()
 
-local Serialization = require(script.processing.Serialization)
-Serialization.SetClassMap(classMap)
+local instanceSerialization = require(script.serializing.instance.Serialization)
+instanceSerialization.SetClassMap(classMap)
 
-local Deserialization = require(script.processing.Deserialization)
-Deserialization.SetClassMap(deserialClassMap)
+local instanceDeserialization = require(script.serializing.instance.Deserialization)
+instanceDeserialization.SetClassMap(deserialClassMap)
 
 -- Public
 local InstanceSerializer = {}
 
 local instanceAllocation = 300
 local create = buffer.create
-local Single = Serialization.Single
+local Single = instanceSerialization.Single
 local readstring = buffer.readstring
 function InstanceSerializer.Single(instance: Instance)
 	local data = create(instanceAllocation)
@@ -22,7 +22,7 @@ function InstanceSerializer.Single(instance: Instance)
 	return readstring(data, 0, Single(data, 0, instance, instancesIdMap, 0))
 end
 
-local Recursive = Serialization.Recursive
+local Recursive = instanceSerialization.Recursive
 function InstanceSerializer.Recursive(instance: Instance)
 	local allocation = #instance:GetDescendants() * instanceAllocation
 	local data = create(allocation)
@@ -34,7 +34,7 @@ function InstanceSerializer.Recursive(instance: Instance)
 end
 
 -- Slower speed, smaller output size
-local RecursiveWithDiffs = Serialization.RecursiveWithDiffs
+local RecursiveWithDiffs = instanceSerialization.RecursiveWithDiffs
 function InstanceSerializer.RecursiveWithDiffs(instance: Instance)
 	local allocation = #instance:GetDescendants() * instanceAllocation
 	local data = create(allocation)
@@ -47,7 +47,7 @@ end
 
 function InstanceSerializer.DeSingle(serial: string)
 	local data = buffer.fromstring(serial)
-	local instance = Deserialization.DeSingle(data, 0)
+	local instance = instanceDeserialization.DeSingle(data, 0)
 
 	return instance
 end
