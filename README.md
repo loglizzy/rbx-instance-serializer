@@ -12,9 +12,9 @@ Benchmark made using a **Model with 34,686 childrens**:
 
 | Mode               | Size (b) | Size (kb) | Size (mb) | Time (secs)           |
 |--------------------|----------|-----------|-----------|-----------------------|
-| Single_(only the selected instance)_             | 35       | 0.035     | 0.000035  | 0.0000268             |
-| Recursive_(instance and it's children)_          | 4,963,573| 4,963.573 | 4.963573  | 0.1320675             |
-| RecursiveWithDiffs_(instance + children + caching)_ | 4,324,440| 4,324.44  | 4.32444   | 0.2742459             |
+| Single(only the selected instance)             | 35       | 0.035     | 0.000035  | 0.0000268             |
+| Recursive(instance and it's children)          | 4,963,573| 4,963.573 | 4.963573  | 0.1320675             |
+| RecursiveWithDiffs(instance + children + caching) | 4,324,440| 4,324.44  | 4.32444   | 0.2742459             |
 
 _Benchmark made using a low-end **Intel i5 vPRO** laptop CPU_;
 
