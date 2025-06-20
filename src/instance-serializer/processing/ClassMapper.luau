@@ -1,4 +1,5 @@
 local valueTypesSerializers = require(script.Parent.ValueTypeSerializers)
+local valueTypesDeserializers = require(script.Parent.ValueTypeDeserializers)
 
 -- Tags that indicate properties that shouldn't be serialized
 local READ_ONLY_TAG = "ReadOnly"
@@ -22,7 +23,7 @@ local function CheckIndex(o, i)
 end
 
 -- Maps a single class's properties and creates its serialization information
-local function MapClass(classMap: any, class: any, classSuper: string, classId: number)
+local function MapClass(classMap: {}, deserialClassMap: {}, class: any, classSuper: string, classId: number)
 	-- Try creating an instance of the class
 	-- used to determine default values for properties
 	local className = class.Name
@@ -30,14 +31,20 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 	classInstance = ok and classInstance
 
 	local properties = {}
+	local idMappedProperties = {}
 
 	-- Track instance-type properties separately
 	local instanceProperties = {}
+	local idMappedInstanceProperties = {}
 
 	-- Track string-type properties separately
 	local stringProperties = {}
+	local idMappedStringProperties = {
+		[1] = "Name",
+	}
 
-	local propCount = 1
+	local classSuper = classMap[classSuper]
+	local propCount = classSuper and classSuper[5] or 0
 	-- Iterate through all class members to find serializable properties
 	for _, property in class.Members do
 		local valueType = property.ValueType
@@ -80,10 +87,12 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 			-- For properties with instance value
 			propCount += 1
 			instanceProperties[propertyName] = { propCount, propertyDefault }
+			idMappedInstanceProperties[propCount] = propertyName
 		elseif valueTypeName == "string" then
 			-- For string properties
 			propCount += 1
 			stringProperties[propertyName] = { propCount, propertyDefault }
+			idMappedStringProperties[propCount] = propertyName
 		else
 			-- For any other properties
 			serializer = valueTypesSerializers[valueTypeName]
@@ -97,6 +106,12 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 				propertyDefault,
 				serializer,
 			}
+
+			local deserializer = valueTypesDeserializers[valueTypeName]
+			idMappedProperties[propCount] = {
+				propertyName,
+				deserializer,
+			}
 		end
 	end
 
@@ -104,9 +119,9 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 		classInstance:Destroy()
 	end
 
-	classSuper = classMap[classSuper]
 	-- Inherit properties from super class
 	if classSuper then
+		-- Inherit serialization mappings
 		for i, v in classSuper[2] do
 			properties[i] = v
 		end
@@ -118,18 +133,51 @@ local function MapClass(classMap: any, class: any, classSuper: string, classId: 
 		for i, v in classSuper[4] do
 			stringProperties[i] = v
 		end
+
+		-- Inherit deserialization mappings
+		local superDeserialClassMap = deserialClassMap[classSuper[1]]
+		if superDeserialClassMap then
+			for i, v in superDeserialClassMap[2] do
+				idMappedProperties[i] = v
+			end
+
+			for i, v in superDeserialClassMap[3] do
+				idMappedInstanceProperties[i] = v
+			end
+
+			for i, v in superDeserialClassMap[4] do
+				idMappedStringProperties[i] = v
+			end
+		end
 	end
 
 	return {
-		classId,
-		properties,
-		instanceProperties,
-		stringProperties,
+		{
+			classId,
+			properties,
+			instanceProperties,
+			stringProperties,
+			propCount,
+		},
+		{
+			function ()
+				return Instance.new(className)
+			end,
+			idMappedProperties,
+			idMappedInstanceProperties,
+			idMappedStringProperties,
+		},
 	}
 end
 
 -- Maps classes that have their superclass already mapped
-local function MapClassesWithSuper(classList: { any }, mappedSupers: {}, classMap: {}, classCount: number)
+local function MapClassesWithSuper(
+	classList: { any },
+	mappedSupers: {},
+	classMap: {},
+	deserialClassMap: {},
+	classCount: number
+)
 	local notMapped = {}
 	for _, class in classList do
 		local classSuper = class.Superclass
@@ -138,7 +186,10 @@ local function MapClassesWithSuper(classList: { any }, mappedSupers: {}, classMa
 
 			mappedSupers[className] = true
 			classCount += 1
-			classMap[class.Name] = MapClass(classMap, class, classSuper, classCount)
+
+			local map = MapClass(classMap, deserialClassMap, class, classSuper, classCount)
+			classMap[class.Name] = map[1]
+			deserialClassMap[classCount] = map[2]
 		else
 			table.insert(notMapped, class)
 		end
@@ -166,11 +217,12 @@ function ClassMapper.GenerateMapping(apiDump: any)
 	-- Multiple passes to ensure inheritance chain is properly processed
 	local notMapped = table.clone(apiDump.Classes)
 	local classCount = 0
-	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, classCount)
-	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, classCount)
-	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, classCount)
+	local deserialClassMap = {}
+	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, deserialClassMap, classCount)
+	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, deserialClassMap, classCount)
+	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, deserialClassMap, classCount)
 
-	return classMap
+	return classMap, deserialClassMap
 end
 
 return ClassMapper

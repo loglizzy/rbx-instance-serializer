@@ -1,12 +1,22 @@
 -- Private
-local Serializers = require(script.processing.Serializers)
+local ClassMapper = require(script.processing.ClassMapper)
+local rblxAPIDump = require(script.modules["roblox-api-dumper"]).fetchAndDecodeDump()
+
+-- Generate the class serialization mapping
+local classMap, deserialClassMap = ClassMapper.GenerateMapping(rblxAPIDump)
+
+local Serialization = require(script.processing.Serialization)
+Serialization.SetClassMap(classMap)
+
+local Deserialization = require(script.processing.Deserialization)
+Deserialization.SetClassMap(deserialClassMap)
 
 -- Public
 local InstanceSerializer = {}
 
-local instanceAllocation = 200
+local instanceAllocation = 300
 local create = buffer.create
-local Single = Serializers.Single
+local Single = Serialization.Single
 local readstring = buffer.readstring
 function InstanceSerializer.Single(instance: Instance)
 	local data = create(instanceAllocation)
@@ -15,7 +25,7 @@ function InstanceSerializer.Single(instance: Instance)
 	return readstring(data, 0, Single(data, 0, instance, instancesIdMap, 0))
 end
 
-local Recursive = Serializers.Recursive
+local Recursive = Serialization.Recursive
 function InstanceSerializer.Recursive(instance: Instance)
 	local allocation = #instance:GetDescendants() * instanceAllocation
 	local data = create(allocation)
@@ -27,7 +37,7 @@ function InstanceSerializer.Recursive(instance: Instance)
 end
 
 -- Slower speed, smaller output size
-local RecursiveWithDiffs = Serializers.RecursiveWithDiffs
+local RecursiveWithDiffs = Serialization.RecursiveWithDiffs
 function InstanceSerializer.RecursiveWithDiffs(instance: Instance)
 	local allocation = #instance:GetDescendants() * instanceAllocation
 	local data = create(allocation)
@@ -36,6 +46,13 @@ function InstanceSerializer.RecursiveWithDiffs(instance: Instance)
 	local offset = RecursiveWithDiffs(data, 0, instance, instancesIdMap, 1, {})
 
 	return readstring(data, 0, offset)
+end
+
+function InstanceSerializer.DeSingle(serial: string)
+	local data = buffer.fromstring(serial)
+	local instance = Deserialization.DeSingle(data, 0)
+
+	return instance
 end
 
 return InstanceSerializer

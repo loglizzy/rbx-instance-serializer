@@ -1,4 +1,3 @@
-local min = math.min
 local writei32 = buffer.writei32
 local writef32 = buffer.writef32
 local writeu8 = buffer.writeu8
@@ -38,19 +37,20 @@ return {
 		return o + 4
 	end,
 	CFrame = function(b: buffer, o: number, x: CFrame)
-		local pos = x.Position
-		local look = x.LookVector
-		writef32(b, o, pos.X)
+		local x,y,z,qX,qY,qZ,qW = x:GetComponents()
+		writef32(b, o, x)
 		o += 4
-		writef32(b, o, pos.Y)
+		writef32(b, o, y)
 		o += 4
-		writef32(b, o, pos.Z)
+		writef32(b, o, z)
 		o += 4
-		writef32(b, o, look.X)
+		writef32(b, o, qX)
 		o += 4
-		writef32(b, o, look.Y)
+		writef32(b, o, qY)
 		o += 4
-		writef32(b, o, look.Z)
+		writef32(b, o, qZ)
+		o += 4
+		writef32(b, o, qW)
 		return o + 4
 	end,
 	UDim = function(b: buffer, o: number, x: UDim)

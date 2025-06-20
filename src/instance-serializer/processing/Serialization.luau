@@ -1,72 +1,63 @@
-local ClassMapper = require(script.Parent.ClassMapper)
-local rblxAPIDump = require(script.Parent.Parent.modules["roblox-api-dumper"]).fetchAndDecodeDump()
-
--- Generate the class serialization mapping
-local classMap = ClassMapper.GenerateMapping(rblxAPIDump)
+local classMap
 
 -- Public
-local Serializers = {}
+local Serialization = {}
 
 local writestring = buffer.writestring
 local writeu16 = buffer.writeu16
 local writeu8 = buffer.writeu8
-function Serializers.Single(
+function Serialization.Single(
 	data: buffer,
 	offset: number,
-	obj: Instance,
+	instance: Instance,
 	instancesIdMap: { [Instance]: number },
 	lastInstanceIdMapped: number
 )
-	local className = obj.ClassName
-	local classData = classMap[className]
-	if not classData then
+	local instanceClassName = instance.ClassName
+	local instanceClassMap = classMap[instanceClassName]
+	if not instanceClassMap then
 		return offset
 	end
 
-	local classId = classData[1]
+	local classId = instanceClassMap[1]
 	writeu16(data, offset, classId)
 	offset += 2
 
 	lastInstanceIdMapped += 1
-	instancesIdMap[obj] = lastInstanceIdMapped
+	instancesIdMap[instance] = lastInstanceIdMapped
 
-	-- Write name property
-	local name = obj.Name
-	local totalProperties
-	if name == className then
-		totalProperties = 0
-	else
-		writeu8(data, offset, 1)
-		offset += 1
-
-		writestring(data, offset, name)
-		offset += #name
-
-		totalProperties = 1
-	end
-
-	-- Reserve space for total properties count
-	local totalPropertiesPosition = offset
+	-- Reserve space for total general properties count
+	local totalGeneralPropertiesPosition = offset
 	offset += 1
 
 	-- General properties
-	for propName, propData in classData[2] do
-		local value = obj[propName]
-		if value == propData[2] then
+	local totalGeneralProperties = 0
+	for propName, propData in instanceClassMap[2] do
+		local propValue = instance[propName]
+		if propValue == propData[2] then
 			continue
 		end
 
-		local id, serializer = propData[1], propData[3]
-		writeu8(data, offset, id)
+		local propId, propSerializer = propData[1], propData[3]
+		writeu8(data, offset, propId)
 		offset += 1
 
-		offset = serializer(data, offset, value)
-		totalProperties += 1
+		offset = propSerializer(data, offset, propValue)
+		totalGeneralProperties += 1
 	end
 
+	-- Write total general properties count
+	writeu8(data, totalGeneralPropertiesPosition, totalGeneralProperties)
+	offset += 1
+
+	-- Reserve space for total instance properties count
+	local totalInstancePropertiesPosition = offset
+	offset += 1
+
 	-- Instance properties
-	for propName, propData in classData[3] do
-		local value = instancesIdMap[obj[propName]]
+	local totalInstanceProperties = 0
+	for propName, propData in instanceClassMap[3] do
+		local value = instancesIdMap[instance[propName]]
 		if value == propData[2] then
 			continue
 		end
@@ -77,12 +68,35 @@ function Serializers.Single(
 		writeu16(data, offset, value)
 		offset += 2
 
-		totalProperties += 1
+		totalInstanceProperties += 1
+	end
+
+	-- Write total instance properties count
+	writeu8(data, totalInstancePropertiesPosition, totalInstanceProperties)
+	offset += 1
+
+	-- Reserve space for total string properties count
+	local totalStringPropertiesPosition = offset
+	offset += 1
+	
+	-- Write name property
+	local name = instance.Name
+	local totalStringProperties
+	if name == instanceClassName then
+		totalStringProperties = 0
+	else
+		writeu8(data, offset, 1)
+		offset += 1
+
+		writestring(data, offset, name)
+		offset += #name
+
+		totalStringProperties = 1
 	end
 
 	-- String properties
-	for propName, propData in classData[4] do
-		local value = obj[propName]
+	for propName, propData in instanceClassMap[4] do
+		local value = instance[propName]
 		if value == propData[2] then
 			continue
 		end
@@ -93,16 +107,16 @@ function Serializers.Single(
 		writestring(data, offset, value)
 		offset += #value
 
-		totalProperties += 1
+		totalStringProperties += 1
 	end
 
-	writeu8(data, totalPropertiesPosition, totalProperties)
+	writeu8(data, totalStringPropertiesPosition, totalStringProperties)
 	offset += 1
 
 	return offset
 end
 
-local Single = Serializers.Single
+local Single = Serialization.Single
 local function Recursive(data: buffer, offset: number, obj: Instance, instancesIdMap, lastInstanceIdMapped)
 	offset = Single(data, offset, obj, instancesIdMap, lastInstanceIdMapped)
 
@@ -117,7 +131,7 @@ local function Recursive(data: buffer, offset: number, obj: Instance, instancesI
 	return offset
 end
 
-Serializers.Recursive = Recursive
+Serialization.Recursive = Recursive
 
 local function SingleWithDiffs(
 	data: buffer,
@@ -308,6 +322,10 @@ local function RecursiveWithDiffs(
 	return offset
 end
 
-Serializers.RecursiveWithDiffs = RecursiveWithDiffs
+Serialization.RecursiveWithDiffs = RecursiveWithDiffs
 
-return Serializers
+function Serialization.SetClassMap(newClassMap: {})
+	classMap = newClassMap
+end
+
+return Serialization
