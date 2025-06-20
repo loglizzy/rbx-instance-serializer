@@ -1,10 +1,14 @@
+<!-- To copilot: never use "---" when writing in this file, it's ugly. -->
+
 # 📦 Roblox Instance Serializer
 
 **Ultra-fast, size-efficient serializer for Roblox Instances**
 
-Easily serialize and deserialize Roblox Instances to compact text with exceptional speed and minimal file size. Perfect for saving, sharing, or syncing complex models.
+Easily serialize and deserialize Roblox Instances with insane speed and minimal size.
 
-## 📃 Usage
+It's output is approximately 59%(62% with diffs mode) smaller than the most commum Roblox instance serialization method.
+
+## ✨ Usage
 
 Get the latest release at https://github.com/loglizzy/rbx-instance-serializer/releases
 
@@ -32,16 +36,6 @@ Benchmarks on a **model with 34,686 children**:
 
 _Benchmarks run on a low-end **Intel i5 vPRO** laptop CPU._  
 _Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700116748/Super-Target-Store)_
-
-## 🆚 Size
-
-| Tool                                                             | Output Size (bytes) |
-| ---------------------------------------------------------------- | ------------------- |
-| Instance Recursive                                               | 67,069              |
-| Recursive with diffs                                             | 62,473              |
-| Serialized using loadable roblox code(loadstring + Instance.new) | 162,831             |
-
-**Rbx Instance Serializer** output is approximately 59%(62% with diffs enabled) smaller than the standard Roblox instance serialization method.
 
 ## 🤝 Contributing
 
