@@ -1,4 +1,4 @@
-local serializing = script.Parent.Parent.serializing
+local serializing = script.Parent.serializing
 local valueTypesSerializers = require(serializing.values.Serializers)
 local valueTypesDeserializers = require(serializing.values.Deserializers)
 

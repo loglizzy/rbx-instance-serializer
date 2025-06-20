@@ -1,5 +1,5 @@
 -- Private
-local ClassMapper = require(script["pre-processing"].ClassMapper)
+local ClassMapper = require(script["class-mapper"])
 local classMap, deserialClassMap = ClassMapper.GenerateMapping()
 
 local instanceSerialization = require(script.serializing.instance.Serialization)
