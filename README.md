@@ -28,7 +28,7 @@ _Model used: [**Super Target Store** on Roblox](https://create.roblox.com/store/
 - [ ] Multi-threading support
 - [ ] Unserializer function
 - [ ] Support for Script/LocalScript instances (via coroutine emulation)
-- [ ] Instance diffs (cache similar instances)
+- [x] Instance diffs (cache similar instances)
 - [ ] Attributes support
 - [ ] Metadata for versioning
 - [ ] Whitelist/Blacklist property names
