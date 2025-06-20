@@ -18,13 +18,15 @@ Easily serialize and deserialize Roblox Instances to compact text with exception
 ## 🛠️ Usage
 
 ```lua
-local Serializer = require(path.to.Serializer)
+local InstanceSerializer = require(path.to["instance-serializer"])
 
--- Serialize an instance (and its children)
-local serialized = Serializer.serialize(instance)
+-- Serialize an instance
+local serialized = InstanceSerializer.Single(workspace.Part)
+print(serializer)
 
 -- Deserialize back to an instance
-local restored = Serializer.deserialize(serialized)
+local restored = InstanceSerializer.DeSingle(serialized)
+restored.Parent = workspace
 ```
 
 ---
