@@ -44,3 +44,5 @@ Contributions and feedback are welcome!
 Feel free to open issues or submit pull requests.
 
 <sub>_README generated entirely by GitHub Copilot_</sub>
+
+<sub>_That project is very raw and you can currently only deserialize single instances_</sub>
