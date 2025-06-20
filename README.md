@@ -33,7 +33,7 @@ _Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700
 ## 📝 Roadmap
 
 - [ ] Multi-threading support
-- [ ] Deserialization (unserializer) function
+- [x] Deserialization (unserializer) function
 - [ ] Script/LocalScript support (via coroutine emulation)
 - [x] Instance diffs (cache similar instances)
 - [ ] Attributes support
