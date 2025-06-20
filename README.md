@@ -4,17 +4,6 @@
 
 Easily serialize and deserialize Roblox Instances to compact text with exceptional speed and minimal file size. Perfect for saving, sharing, or syncing complex models.
 
----
-
-## 🚀 Features
-
-- **Blazing Fast:** Handles large hierarchies in milliseconds.
-- **Tiny Output:** Optimized for minimal serialized size.
-- **Flexible:** Supports single instances or entire hierarchies.
-- **Caching:** Smart diff-based serialization for efficient updates.
-
----
-
 ## 🛠️ Usage
 
 ```lua
@@ -29,8 +18,6 @@ local restored = InstanceSerializer.DeSingle(serialized)
 restored.Parent = workspace
 ```
 
----
-
 ## ⚡ Performance
 
 Benchmarks on a **model with 34,686 children**:
@@ -44,13 +31,16 @@ Benchmarks on a **model with 34,686 children**:
 _Benchmarks run on a low-end **Intel i5 vPRO** laptop CPU._  
 _Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700116748/Super-Target-Store)_
 
----
+## 🚀 Features
+
+- **Blazing Fast:** Handles large hierarchies in milliseconds.
+- **Tiny Output:** Optimized for minimal serialized size.
+- **Flexible:** Supports single instances or entire hierarchies.
+- **Caching:** Smart diff-based serialization for efficient updates.
 
 ## 🤝 Contributing
 
 Contributions and feedback are welcome!  
 Feel free to open issues or submit pull requests.
-
----
 
 <sub>_README generated with help from GitHub Copilot_</sub>
