@@ -30,7 +30,7 @@ Benchmarks on a **model with 34,686 children**:
 
 | Mode                                     | Size (bytes) | Size (KB) | Size (MB) | Time (seconds) |
 | ---------------------------------------- | ------------ | --------- | --------- | -------------- |
-| Single (selected instance only)          | 35           | 0.035     | 0.000035  | 0.000027       |
+| Single (model instance only, no childs)          | 35           | 0.035     | 0.000035  | 0.000027       |
 | Recursive (instance + children)          | 4,963,573    | 4,963.573 | 4.964     | 0.132          |
 | RecursiveWithDiffs (recursive + caching) | 4,324,440    | 4,324.440 | 4.324     | 0.274          |
 
