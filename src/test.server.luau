@@ -22,6 +22,8 @@ local function TestSerialization()
 	end
 end
 
+TestSerialization()
+
 -- Unserialization
 local function TestDeserialization()
 	local serial = InstanceSerializer.Single(model)
