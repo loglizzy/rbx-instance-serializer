@@ -1,38 +1,50 @@
 # 📦 Roblox Instance Serializer
 
-**Ultra-fast and size-effective instance serializer for Roblox.**
+**Ultra-fast, size-efficient serializer for Roblox Instances.**
 
-Turns game instances into text at a insane speed.
+Serialize game instances to text with exceptional speed and minimal size.
 
 ---
 
 ## ⚡ Performance
 
-Benchmark made using a **Model with 34,686 childrens**:
+Benchmarks performed on a **model with 34,686 children**:
 
-| Mode               | Size (b) | Size (kb) | Size (mb) | Time (secs)           |
-|--------------------|----------|-----------|-----------|-----------------------|
-| Single(only the selected instance)             | 35       | 0.035     | 0.000035  | 0.0000268             |
-| Recursive(instance and it's children)          | 4,963,573| 4,963.573 | 4.963573  | 0.1320675             |
-| RecursiveWithDiffs(instance + children + caching) | 4,324,440| 4,324.44  | 4.32444   | 0.2742459             |
+| Mode                                   | Size (bytes) | Size (KB)  | Size (MB)  | Time (seconds)        |
+|----------------------------------------|--------------|------------|------------|-----------------------|
+| Single (selected instance only)        | 35           | 0.035      | 0.000035   | 0.000027              |
+| Recursive (instance + children)        | 4,963,573    | 4,963.573  | 4.964      | 0.132                 |
+| RecursiveWithDiffs (+ caching)         | 4,324,440    | 4,324.440  | 4.324      | 0.274                 |
 
-_Benchmark made using a low-end **Intel i5 vPRO** laptop CPU_;
+_Benchmarks run on a low-end **Intel i5 vPRO** laptop CPU._
 
-_Model used: [**Super Target Store** on Roblox](https://create.roblox.com/store/asset/6700116748/Super-Target-Store);_
-
+_Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700116748/Super-Target-Store)_
 
 ---
 
-## 📝 Todos
+## 🚀 Features
+
+- Blazing fast serialization
+- Highly compact output
+- Easy integration with Roblox projects
+
+---
+
+## 📝 Roadmap
 
 - [ ] Multi-threading support
-- [ ] Unserializer function
-- [ ] Support for Script/LocalScript instances (via coroutine emulation)
+- [ ] Deserialization (unserializer) function
+- [ ] Script/LocalScript support (via coroutine emulation)
 - [x] Instance diffs (cache similar instances)
 - [ ] Attributes support
 - [ ] Metadata for versioning
-- [ ] Whitelist/Blacklist property names
+- [ ] Property whitelist/blacklist
 
 ---
 
-> _Contributions and feedback are welcome!_
+## 🤝 Contributing
+
+Contributions and feedback are welcome!  
+Feel free to open issues or submit pull requests.
+
+---
