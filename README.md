@@ -43,4 +43,4 @@ _Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700
 Contributions and feedback are welcome!  
 Feel free to open issues or submit pull requests.
 
-<sub>_README generated with help from GitHub Copilot_</sub>
+<sub>_README generated entirely by GitHub Copilot_</sub>
