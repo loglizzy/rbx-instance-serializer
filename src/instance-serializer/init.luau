@@ -1,9 +1,6 @@
 -- Private
-local ClassMapper = require(script.processing.ClassMapper)
-local rblxAPIDump = require(script.modules["roblox-api-dumper"]).fetchAndDecodeDump()
-
--- Generate the class serialization mapping
-local classMap, deserialClassMap = ClassMapper.GenerateMapping(rblxAPIDump)
+local ClassMapper = require(script["pre-processing"].ClassMapper)
+local classMap, deserialClassMap = ClassMapper.GenerateMapping()
 
 local Serialization = require(script.processing.Serialization)
 Serialization.SetClassMap(classMap)

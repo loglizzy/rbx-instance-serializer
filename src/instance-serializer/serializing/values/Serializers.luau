@@ -37,7 +37,7 @@ return {
 		return o + 4
 	end,
 	CFrame = function(b: buffer, o: number, x: CFrame)
-		local x,y,z,qX,qY,qZ,qW = x:GetComponents()
+		local x, y, z, qX, qY, qZ, qW = x:GetComponents()
 		writef32(b, o, x)
 		o += 4
 		writef32(b, o, y)

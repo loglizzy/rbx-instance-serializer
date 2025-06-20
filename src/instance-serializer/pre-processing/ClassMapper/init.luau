@@ -1,5 +1,8 @@
-local valueTypesSerializers = require(script.Parent.ValueTypeSerializers)
-local valueTypesDeserializers = require(script.Parent.ValueTypeDeserializers)
+local serializing = script.Parent.Parent.serializing
+local valueTypesSerializers = require(serializing.values.Serializers)
+local valueTypesDeserializers = require(serializing.values.Deserializers)
+
+local robloxApiDumper = require(script["roblox-api-dumper"])
 
 -- Tags that indicate properties that shouldn't be serialized
 local READ_ONLY_TAG = "ReadOnly"
@@ -202,7 +205,7 @@ end
 local ClassMapper = {}
 
 -- Generates a mapping of all classes and their serializable properties
-function ClassMapper.GenerateMapping(apiDump: any)
+function ClassMapper.GenerateMapping()
 	local classMap = {
 		["<<<ROOT>>>"] = {
 			[2] = {},
@@ -213,11 +216,12 @@ function ClassMapper.GenerateMapping(apiDump: any)
 	local mappedSupers = {
 		["<<<ROOT>>>"] = true,
 	}
-
-	-- Multiple passes to ensure inheritance chain is properly processed
+	
+	local apiDump = robloxApiDumper.fetchAndDecodeDump()
 	local notMapped = table.clone(apiDump.Classes)
 	local classCount = 0
 	local deserialClassMap = {}
+	-- Multiple passes to ensure inheritance chain is properly processed
 	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, deserialClassMap, classCount)
 	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, deserialClassMap, classCount)
 	notMapped, classCount = MapClassesWithSuper(notMapped, mappedSupers, classMap, deserialClassMap, classCount)
