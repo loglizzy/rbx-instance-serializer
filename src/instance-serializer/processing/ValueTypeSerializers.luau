@@ -20,11 +20,11 @@ return {
 		return o + 1
 	end,
 	Color3 = function(b: buffer, o: number, x: Color3)
-		writeu8(b, o, min(255, x.R * 255))
+		writeu8(b, o, x.R * 255)
 		o += 1
-		writeu8(b, o, min(255, x.G * 255))
+		writeu8(b, o, x.G * 255)
 		o += 1
-		writeu8(b, o, min(255, x.B * 255))
+		writeu8(b, o, x.B * 255)
 		return o + 1
 	end,
 	UDim2 = function(b: buffer, o: number, x: UDim2)
