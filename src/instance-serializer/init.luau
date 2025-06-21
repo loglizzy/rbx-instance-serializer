@@ -11,7 +11,7 @@ instanceDeserialization.SetClassMap(deserialClassMap)
 -- Public
 local InstanceSerializer = {}
 
-local instanceAllocation = 300
+local instanceAllocation = 240
 local create = buffer.create
 local Single = instanceSerialization.Single
 local readstring = buffer.readstring
