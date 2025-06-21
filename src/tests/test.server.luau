@@ -1,4 +1,5 @@
-local InstanceSerializer = require(script.Parent["instance-serializer"])
+local ServerScriptService = game:GetService("ServerScriptService")
+local InstanceSerializer = require(ServerScriptService.src.core["instance-serializer"])
 
 local model = workspace:FindFirstChildOfClass("Model")
 

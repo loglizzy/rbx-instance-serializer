@@ -6,7 +6,8 @@ local HttpService = game:GetService("HttpService")
 local localDumpModule = script.dump
 function RLBXAPIDumper.fetchAndDecodeDump(fromWeb: boolean?): APIDump
 	if fromWeb then
-		-- Fetching api dump
+		-- Fetching api dump from the web
+		-- This gets the latest dump from the Roblox Client Tracker repository
 		local APIDump = HttpService:GetAsync(
 			"https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/refs/heads/roblox/API-Dump.json"
 		)

@@ -1,3 +1,15 @@
+--[[
+    class-mapper/init.luau
+    ----------------------
+    Responsible for mapping Roblox class metadata for serialization and deserialization.
+    Builds property maps for each class, including inheritance, and provides mapping utilities.
+    
+    Functions:
+    - MapClass: Maps a single class's properties and serialization info.
+    - MapClassesWithSuper: Maps classes whose superclasses are already mapped.
+    - ClassMapper.GenerateMapping: Generates the full class/property mapping for the serializer.
+]]
+
 local serializing = script.Parent.serializing
 local valueTypesSerializers = require(serializing.values.Serializers)
 local valueTypesDeserializers = require(serializing.values.Deserializers)
@@ -8,7 +20,6 @@ local robloxApiDumper = require(script["roblox-api-dumper"])
 local READ_ONLY_TAG = "ReadOnly"
 local NOT_SCRIPTABLE_TAG = "NotScriptable"
 
--- Private
 -- Checks if a property has forbidden tags (ReadOnly or NotScriptable)
 local function isForbiddenTag(tags: { string })
 	for _, tag in tags do
@@ -19,16 +30,22 @@ local function isForbiddenTag(tags: { string })
 	return false
 end
 
+-- Helper to safely access and cache property values
 local function CheckIndex(o, i)
 	local v = o[i]
 	o[i] = v
 	return v
 end
 
--- Maps a single class's properties and creates its serialization information
+local instanceNew = Instance.new
+
+--[[
+    Maps a single class's properties and creates its serialization information.
+    Handles inheritance, default values, and property type mapping.
+    Returns serialization and deserialization mapping tables.
+]]
 local function MapClass(classMap: {}, deserialClassMap: {}, class: any, classSuper: string, classId: number)
-	-- Try creating an instance of the class
-	-- used to determine default values for properties
+	-- Try creating an instance of the class to determine default values
 	local className = class.Name
 	local ok, classInstance = pcall(Instance.new, className)
 	classInstance = ok and classInstance
@@ -164,7 +181,7 @@ local function MapClass(classMap: {}, deserialClassMap: {}, class: any, classSup
 		},
 		{
 			function ()
-				return Instance.new(className)
+				return instanceNew(className)
 			end,
 			idMappedProperties,
 			idMappedInstanceProperties,
@@ -173,7 +190,10 @@ local function MapClass(classMap: {}, deserialClassMap: {}, class: any, classSup
 	}
 end
 
--- Maps classes that have their superclass already mapped
+--[[
+    Maps classes that have their superclass already mapped.
+    Returns a list of classes not yet mapped and the updated class count.
+]]
 local function MapClassesWithSuper(
 	classList: { any },
 	mappedSupers: {},
@@ -201,10 +221,13 @@ local function MapClassesWithSuper(
 	return notMapped, classCount
 end
 
--- Public
+-- Public API for class mapping
 local ClassMapper = {}
 
--- Generates a mapping of all classes and their serializable properties
+--[[
+    Generates a mapping of all classes and their serializable properties.
+    Returns classMap and deserialClassMap for use in serialization/deserialization.
+]]
 function ClassMapper.GenerateMapping()
 	local classMap = {
 		["<<<ROOT>>>"] = {

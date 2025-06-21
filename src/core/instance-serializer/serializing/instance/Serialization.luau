@@ -1,3 +1,16 @@
+--[[
+    Serialization.luau
+    ------------------
+    Provides functions to serialize Roblox Instances into a compact binary format.
+    Handles general, instance, and string properties, and supports recursive serialization.
+    
+    Functions:
+    - Serialization.Single: Serializes a single instance.
+    - Serialization.Recursive: Serializes an instance and its descendants.
+    - Serialization.RecursiveWithDiffs: Serializes with diff/caching support.
+    - Serialization.SetClassMap: Sets the class mapping for serialization.
+]]
+
 local classMap
 
 -- Public
@@ -6,6 +19,17 @@ local Serialization = {}
 local writestring = buffer.writestring
 local writeu16 = buffer.writeu16
 local writeu8 = buffer.writeu8
+
+--[[
+    Serializes a single instance into the buffer.
+    Skips properties with default values for compactness.
+    - data: buffer to write to
+    - offset: current write position
+    - instance: Instance to serialize
+    - instancesIdMap: map of Instance to id
+    - lastInstanceIdMapped: last used id
+    Returns new offset after writing.
+]]
 function Serialization.Single(
 	data: buffer,
 	offset: number,
@@ -20,103 +44,131 @@ function Serialization.Single(
 	end
 
 	local classId = instanceClassMap[1]
+	-- Write class id
 	writeu16(data, offset, classId)
 	offset += 2
 
+	-- Add instance to the id map table so it can be referenced by instance properties
 	lastInstanceIdMapped += 1
 	instancesIdMap[instance] = lastInstanceIdMapped
 
-	-- Reserve space for total general properties count
-	local totalGeneralPropertiesPosition = offset
-	offset += 1
+	-- Serialize general properties
+	do
+		-- Reserve space for total general properties count
+		local totalGeneralPropertiesPosition = offset
+		offset += 1
 
-	-- General properties
-	local totalGeneralProperties = 0
-	for propName, propData in instanceClassMap[2] do
-		local propValue = instance[propName]
-		if propValue == propData[2] then
-			continue
+		-- General properties
+		local totalGeneralProperties = 0
+		for propName, propData in instanceClassMap[2] do
+			local propValue = instance[propName]
+			-- Skip if property value is defaulted
+			if propValue == propData[2] then
+				continue
+			end
+
+			local propId, propSerializer = propData[1], propData[3]
+			-- Write property id
+			writeu8(data, offset, propId)
+			offset += 1
+
+			-- Serialize property value into the data buffer and get the new offset
+			offset = propSerializer(data, offset, propValue)
+			totalGeneralProperties += 1
 		end
 
-		local propId, propSerializer = propData[1], propData[3]
-		writeu8(data, offset, propId)
+		-- Write total general properties count
+		writeu8(data, totalGeneralPropertiesPosition, totalGeneralProperties)
 		offset += 1
-
-		offset = propSerializer(data, offset, propValue)
-		totalGeneralProperties += 1
 	end
 
-	-- Write total general properties count
-	writeu8(data, totalGeneralPropertiesPosition, totalGeneralProperties)
-	offset += 1
+	-- Serializing instance properties
+	do
+		-- Reserve space for total instance properties count
+		local totalInstancePropertiesPosition = offset
+		offset += 1
 
-	-- Reserve space for total instance properties count
-	local totalInstancePropertiesPosition = offset
-	offset += 1
+		-- Instance properties
+		local totalInstanceProperties = 0
+		for propName, propData in instanceClassMap[3] do
+			local value = instancesIdMap[instance[propName]]
+			if value == propData[2] then
+				continue
+			end
 
-	-- Instance properties
-	local totalInstanceProperties = 0
-	for propName, propData in instanceClassMap[3] do
-		local value = instancesIdMap[instance[propName]]
-		if value == propData[2] then
-			continue
+			-- Write property id
+			writeu8(data, offset, propData[1])
+			offset += 1
+
+			-- Write property value
+			writeu16(data, offset, value)
+			offset += 2
+
+			totalInstanceProperties += 1
 		end
 
-		writeu8(data, offset, propData[1])
+		-- Write total instance properties count
+		writeu8(data, totalInstancePropertiesPosition, totalInstanceProperties)
 		offset += 1
-
-		writeu16(data, offset, value)
-		offset += 2
-
-		totalInstanceProperties += 1
 	end
 
-	-- Write total instance properties count
-	writeu8(data, totalInstancePropertiesPosition, totalInstanceProperties)
-	offset += 1
-
-	-- Reserve space for total string properties count
-	local totalStringPropertiesPosition = offset
-	offset += 1
-	
-	-- Write name property
-	local name = instance.Name
-	local totalStringProperties
-	if name == instanceClassName then
-		totalStringProperties = 0
-	else
-		writeu8(data, offset, 1)
+	-- Serializing string properties
+	do
+		-- Reserve space for total string properties count
+		local totalStringPropertiesPosition = offset
 		offset += 1
 
-		writestring(data, offset, name)
-		offset += #name
+		-- Write name property if not default
+		-- Also initializes totalStringProperties with 0 when name is default and 1 when it needed to be serialized
+		local name = instance.Name
+		local totalStringProperties
+		if name == instanceClassName then
+			totalStringProperties = 0
+		else
+			-- Write name property id
+			-- Name property id is always 1
+			writeu8(data, offset, 1)
+			offset += 1
 
-		totalStringProperties = 1
-	end
+			-- Write name as string
+			writestring(data, offset, name)
+			offset += #name
 
-	-- String properties
-	for propName, propData in instanceClassMap[4] do
-		local value = instance[propName]
-		if value == propData[2] then
-			continue
+			totalStringProperties = 1
 		end
 
-		writeu8(data, offset, propData[1])
+		-- Iter string properties
+		for propName, propData in instanceClassMap[4] do
+			local value = instance[propName]
+			if value == propData[2] then
+				continue
+			end
+
+			-- Write property id
+			writeu8(data, offset, propData[1])
+			offset += 1
+
+			-- Write property value as string
+			writestring(data, offset, value)
+			offset += #value
+
+			totalStringProperties += 1
+		end
+
+		-- Write total string properties count
+		writeu8(data, totalStringPropertiesPosition, totalStringProperties)
 		offset += 1
-
-		writestring(data, offset, value)
-		offset += #value
-
-		totalStringProperties += 1
 	end
-
-	writeu8(data, totalStringPropertiesPosition, totalStringProperties)
-	offset += 1
 
 	return offset
 end
 
 local Single = Serialization.Single
+
+--[[
+    Recursively serializes an instance and all its descendants.
+    Calls Single for each instance, then serializes children.
+]]
 local function Recursive(data: buffer, offset: number, obj: Instance, instancesIdMap, lastInstanceIdMapped)
 	offset = Single(data, offset, obj, instancesIdMap, lastInstanceIdMapped)
 
@@ -133,6 +185,17 @@ end
 
 Serialization.Recursive = Recursive
 
+--[[
+    Serializes an instance with diff/caching support for efficient storage.
+    alreadySerialized: table of already serialized properties for diffing.
+    - data: buffer to write to
+    - offset: current write position
+    - obj: Instance to serialize
+    - instancesIdMap: map of Instance to id
+    - lastInstanceIdMapped: last used id
+    - alreadySerialized: cache for diffing
+    Returns new offset after writing.
+]]
 local function SingleWithDiffs(
 	data: buffer,
 	offset: number,
@@ -148,15 +211,17 @@ local function SingleWithDiffs(
 	end
 
 	local classId = classData[1]
+	-- Write class id
 	writeu16(data, offset, classId)
 	offset += 2
 
+	-- Add instance to the id map table so it can be referenced by instance properties
 	lastInstanceIdMapped += 1
 	instancesIdMap[obj] = lastInstanceIdMapped
 
 	local myStringPropSection = {}
 
-	-- Write name property
+	-- Write name property if not default
 	local name = obj.Name
 	local totalProperties
 	if name == className then
@@ -164,19 +229,22 @@ local function SingleWithDiffs(
 	else
 		myStringPropSection[1] = name
 
+		-- Write name property id (always 1)
 		writeu8(data, offset, 1)
 		offset += 1
 
+		-- Write name as string
 		writestring(data, offset, name)
 		offset += #name
 
 		totalProperties = 1
 	end
 
-	-- General properties
+	-- General properties (non-instance, non-string)
 	local myGeneralPropSection = {}
 	for propName, propData in classData[2] do
 		local value = obj[propName]
+		-- Skip if property value is defaulted
 		if value == propData[2] then
 			continue
 		end
@@ -184,7 +252,7 @@ local function SingleWithDiffs(
 		myGeneralPropSection[propData[1]] = { value, propData[3] }
 	end
 
-	-- Instance properties
+	-- Instance properties (references to other instances)
 	local myInstancePropSection = {}
 	for propName, propData in classData[3] do
 		local value = instancesIdMap[obj[propName]]
@@ -195,7 +263,7 @@ local function SingleWithDiffs(
 		myInstancePropSection[propData[1]] = value
 	end
 
-	-- String properties
+	-- String properties (other than Name)
 	for propName, propData in classData[4] do
 		local value = obj[propName]
 		if value == propData[2] then
@@ -207,7 +275,7 @@ local function SingleWithDiffs(
 
 	local myPropSections = { myGeneralPropSection, myStringPropSection, myInstancePropSection }
 
-	-- Find the best match in already serialized instances
+	-- Find the best match in already serialized instances for diffing
 	local best: {}
 	local bestScore = 0
 	for i, that in alreadySerialized do
@@ -228,19 +296,20 @@ local function SingleWithDiffs(
 		end
 	end
 
-	-- Store cached date only after the iteration above so it doesn't include itself
+	-- Store cached data only after the iteration above so it doesn't include itself
 	alreadySerialized[classId] = {
 		lastInstanceIdMapped,
 		myPropSections,
 	}
 
-	-- Write best match instance map id
+	-- Write best match instance map id (0 if none)
 	writeu8(data, offset, best and best[1] or 0)
 	offset += 1
 
 	-- Only write properties that are not in the best match
 	if best then
 		local bestPropSections = best[2]
+		-- General properties
 		for propId, prop in bestPropSections[1] do
 			local value = prop[1]
 			if value ~= myGeneralPropSection[propId] then
@@ -252,6 +321,7 @@ local function SingleWithDiffs(
 			end
 		end
 
+		-- String properties
 		for propId, value in bestPropSections[2] do
 			if value ~= myStringPropSection[propId] then
 				writeu8(data, offset, propId)
@@ -263,6 +333,7 @@ local function SingleWithDiffs(
 			end
 		end
 
+		-- Instance properties
 		for propId, value in bestPropSections[3] do
 			if value ~= myInstancePropSection[propId] then
 				writeu8(data, offset, propId)
@@ -274,6 +345,7 @@ local function SingleWithDiffs(
 			end
 		end
 	else
+		-- Write all properties if no best match
 		for propId, prop in myGeneralPropSection do
 			writeu8(data, offset, propId)
 			offset += 1
@@ -285,8 +357,12 @@ local function SingleWithDiffs(
 			writeu8(data, offset, propId)
 			offset += 1
 
+			local len = #value
+			writeu8(data, offset, len)
+			offset += 1
+
 			writestring(data, offset, value)
-			offset += #value
+			offset += len
 		end
 
 		for propId, value in myInstancePropSection do
