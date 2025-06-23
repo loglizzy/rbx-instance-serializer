@@ -1,25 +1,24 @@
 -- Private
-local ClassMapper = require(script["class-mapper"])
+local modules = script.modules
+local ClassMapper = require(modules["class-mapper"])
 local classMap, deserialClassMap = ClassMapper.GenerateMapping()
 
-local instanceSerialization = require(script.serializing.instance.Serialization)
+local instanceSerialization, instanceDeserialization = unpack(require(modules["instance-serialization"]))
 instanceSerialization.SetClassMap(classMap)
-
-local instanceDeserialization = require(script.serializing.instance.Deserialization)
-instanceDeserialization.SetClassMap(deserialClassMap)
+instanceDeserialization.SetDeserialClassMap(deserialClassMap)
 
 -- Public
 local InstanceSerializer = {}
 
 local instanceAllocation = 240
 local create = buffer.create
-local Single = instanceSerialization.Single
+local SingleInstance = instanceSerialization.SingleInstance
 local readstring = buffer.readstring
-function InstanceSerializer.Single(instance: Instance)
+function InstanceSerializer.SingleInstance(instance: Instance)
 	local data = create(instanceAllocation)
 	local instancesIdMap = { [instance] = 0 }
 
-	return readstring(data, 0, Single(data, 0, instance, instancesIdMap, 0))
+	return readstring(data, 0, SingleInstance(data, 0, instance, instancesIdMap, 0))
 end
 
 local Recursive = instanceSerialization.Recursive
@@ -45,9 +44,9 @@ function InstanceSerializer.RecursiveWithDiffs(instance: Instance)
 	return readstring(data, 0, offset)
 end
 
-function InstanceSerializer.DeSingle(serial: string)
+function InstanceSerializer.DeSingleInstance(serial: string)
 	local data = buffer.fromstring(serial)
-	local instance = instanceDeserialization.DeSingle(data, 0)
+	local instance = instanceDeserialization.DeSingleInstance(data, 0)
 
 	return instance
 end

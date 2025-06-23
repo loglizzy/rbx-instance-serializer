@@ -6,8 +6,6 @@
 
 Easily serialize and deserialize Roblox Instances with insane speed and minimal size.
 
-It's output is approximately 59%(62% with diffs mode) smaller than the most commum Roblox instance serialization method.
-
 ## ✨ Usage
 
 Get the latest release at https://github.com/loglizzy/rbx-instance-serializer/releases
@@ -41,5 +39,15 @@ _Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700
 
 Contributions and feedback are welcome!  
 Feel free to open issues or submit pull requests.
+
+Quick start:
+1. Clone repository
+```bash
+git clone https://github.com/loglizzy/rbx-instance-serializer
+```
+1. Start Rojo at VS Code(_repo has a rojo project configured, you just need to start it_) and Roblox Studio
+2. Playtest by pressing `F8` at studio
+
+___
 
 <sub>_README generated entirely by GitHub Copilot_</sub>
