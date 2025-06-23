@@ -3,7 +3,7 @@ local InstanceSerializer = require(ServerScriptService.lib)
 
 local SingleInstance = InstanceSerializer.SingleInstance
 local clock = os.clock
-local steps = 1_000_000
+local steps, stepsLabel = 1_000_000, "1 million"
 local billion = 1_000_000_000
 return function(target: Instance)
 	local elapsed = 0
@@ -20,10 +20,10 @@ return function(target: Instance)
         elapsed += took
 	end
 
-	warn(`Speed overview after serializing {steps} times:`)
+	warn(`Speed overview after serializing {stepsLabel} times:`)
 	print(`Time took to serialize all:`, elapsed)
 	local avarage = elapsed / steps
-	print("Avarage time per instance:", avarage)
+	print("Avarage time per serialization:", avarage)
     print("Lowest time in all:", lowest)
 
     warn("Minutes needed to serialize 1 billion instances:")
