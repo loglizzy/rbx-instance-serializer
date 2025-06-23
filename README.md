@@ -40,16 +40,17 @@ _Model: [Super Target Store (Roblox)](https://create.roblox.com/store/asset/6700
 Contributions and feedback are welcome!  
 Feel free to open issues or submit pull requests.
 
-Quick start:
-
+**Quick start:**
 1. Clone repository
 
 ```bash
 git clone https://github.com/loglizzy/rbx-instance-serializer
 ```
 
-1. Start Rojo at VS Code(_repo has a rojo project configured, you just need to start it_) and Roblox Studio
-2. Playtest by pressing `F8` at studio
+2. Start Rojo at VS Code(_repo has a rojo project configured, you just need to start it_)
+3. Connect Rojo plugin in Roblox Studio
+4. Playtest by pressing `F8` at studio
+5. Make any improvement or addition you find usefull and commit it
 
 ---
 
